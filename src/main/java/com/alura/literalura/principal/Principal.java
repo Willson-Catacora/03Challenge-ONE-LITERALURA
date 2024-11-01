@@ -1,9 +1,17 @@
 package com.alura.literalura.principal;
 
+import com.alura.literalura.model.Datos;
+import com.alura.literalura.service.ConsumirAPI;
+import com.alura.literalura.service.ConvierteDatos;
+
 import java.util.Scanner;
 
 public class Principal {
     private Scanner teclado = new Scanner(System.in);
+    private ConsumirAPI consumirApi = new ConsumirAPI();
+    private ConvierteDatos convierteDatos = new ConvierteDatos();
+
+    private final String URL_BASE = "https://gutendex.com/books/";
     private Integer opcion = -1;
 
     public void mostrarMenu() {
@@ -38,6 +46,10 @@ public class Principal {
     }
 
     private void buscarLibroPorTitulo() {
-
+        System.out.println("\nIngrese el nombre del libro que desee buscar");
+        var libro = teclado.nextLine();
+        var json = consumirApi.obtenerDatos(URL_BASE +"?search="+ libro.toLowerCase().replace(" ","%20"));
+        var datos = convierteDatos.obtenerDatos(json, Datos.class);
+        System.out.println(datos);
     }
 }
