@@ -21,9 +21,9 @@ public class Principal {
     public void mostrarMenu() {
         while (opcion != 0) {
             var menu = """
-                    ***===============================================***
-                    \t\tElija la opción a travéz  de su número
-                    ***===============================================***
+                    ***==================================================***
+                    \t\tElija una de las opción a travéz  de su número
+                    ***==================================================***
                     \t1 - buscar libro por título
                     \t2 - listar libros registrados
                     \t3 - listar autores registrados
@@ -31,7 +31,7 @@ public class Principal {
                     \t5 - listar libros por idioma
                     
                     \t0  - Salir
-                    ***===============================================***
+                    ***==================================================***
                     """;
             System.out.println(menu);
             opcion = teclado.nextInt();
