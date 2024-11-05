@@ -1,22 +1,37 @@
 package com.alura.literalura.model;
 
+import jakarta.persistence.*;
+
 import java.util.*;
 import java.util.Optional;
 
+@Entity
+@Table(name = "libro")
 public class Libro {
-    String titulo;
-    List<Autor> autores;
-    List<String> idiomas;
-    Integer descargas;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long Id;
+    @Column(unique = true)
+    private String titulo;
+    @Enumerated(EnumType.ORDINAL)
+    Set<Idioma> idiomas;
+    private Integer descargas;
+    @ManyToMany
+    @JoinTable(
+            name = "libro_autor", // Tabla intermedia
+            joinColumns = @JoinColumn(name = "libro_id"), // Columna de la entidad Libro
+            inverseJoinColumns = @JoinColumn(name = "autor_id") // Columna de la entidad Autor
+    )
+    private Set<Autor> autores = new HashSet<>();
 
-    public Libro(Optional<DatosLibro> datosLibro) {
-        this.autores = new ArrayList<>();
-        this.titulo = datosLibro.get().titulo();
-        datosLibro.get().autores().forEach(
-                a -> this.autores.add(new Autor(a.nombre(), a.fechaDeNacimiento(), a.fechaDeFallecimiento()))
-        );
-        this.idiomas = datosLibro.get().idiomas();
-        this.descargas = datosLibro.get().descargas();
+    public Libro() {
+    }
+
+    public Libro(String titulo, Set<Autor> autor, Set<Idioma> idiomas, Integer descargas) {
+        this.titulo = titulo;
+        this.autores = autor;
+        this.idiomas = idiomas;
+        this.descargas = descargas;
     }
 
     @Override
@@ -37,19 +52,19 @@ public class Libro {
         this.titulo = titulo;
     }
 
-    public List<Autor> getAutores() {
+    public Set<Autor> getAutor() {
         return autores;
     }
 
-    public void setAutores(List<Autor> autores) {
-        this.autores = autores;
+    public void setAutor(Set<Autor> autor) {
+        this.autores = autor;
     }
 
-    public List<String> getIdiomas() {
+    public Set<Idioma> getIdiomas() {
         return idiomas;
     }
 
-    public void setIdiomas(List<String> idiomas) {
+    public void setIdiomas(Set<Idioma> idiomas) {
         this.idiomas = idiomas;
     }
 

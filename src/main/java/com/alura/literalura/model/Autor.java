@@ -1,11 +1,25 @@
 package com.alura.literalura.model;
 
-public class Autor {
-    String nombre;
-    Integer fechaDeNacimiento;
-    Integer fechaDeFallecimiento;
+import jakarta.persistence.*;
 
-    public Autor(String nombre, Integer integer, Integer integer1) {
+import java.util.*;
+
+@Entity
+@Table(name = "autor")
+public class Autor {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long Id;
+    @Column(unique = true)
+    private String nombre;
+    private Integer fechaDeNacimiento;
+    private Integer fechaDeFallecimiento;
+    @ManyToMany(mappedBy = "autores")
+    private Set<Libro> libros = new HashSet<>();
+
+    public Autor(){}
+
+    public Autor(String nombre, Integer fechaDeNacimiento, Integer fechaDeFallecimiento) {
         this.nombre = nombre;
         this.fechaDeNacimiento = fechaDeNacimiento;
         this.fechaDeFallecimiento = fechaDeFallecimiento;
@@ -42,5 +56,21 @@ public class Autor {
 
     public void setFechaDeFallecimiento(Integer fechaDeFallecimiento) {
         this.fechaDeFallecimiento = fechaDeFallecimiento;
+    }
+
+    public Long getId() {
+        return Id;
+    }
+
+    public void setId(Long id) {
+        Id = id;
+    }
+
+    public Set<Libro> getLibros() {
+        return libros;
+    }
+
+    public void setLibros(Set<Libro> libros) {
+        this.libros = libros;
     }
 }

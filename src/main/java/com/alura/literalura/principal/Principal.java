@@ -1,22 +1,26 @@
 package com.alura.literalura.principal;
 
-import com.alura.literalura.model.Datos;
-import com.alura.literalura.model.DatosLibro;
-import com.alura.literalura.model.Libro;
-import com.alura.literalura.service.ConsumirAPI;
-import com.alura.literalura.service.ConvierteDatos;
+import com.alura.literalura.model.*;
+import com.alura.literalura.repository.*;
+import com.alura.literalura.service.*;
 
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Principal {
     private Scanner teclado = new Scanner(System.in);
     private ConsumirAPI consumirApi = new ConsumirAPI();
     private ConvierteDatos convierteDatos = new ConvierteDatos();
+    private LibroRepository libroRepository;
+    private AutorRepository autorRepository;
 
     private final String URL_BASE = "https://gutendex.com/books/";
     private Integer opcion = -1;
+
+    public Principal(LibroRepository libroRepository, AutorRepository autorRepository) {
+        this.libroRepository = libroRepository;
+        this.autorRepository = autorRepository;
+    }
 
     public void mostrarMenu() {
         while (opcion != 0) {
@@ -54,12 +58,23 @@ public class Principal {
         var libroBuscado = teclado.nextLine();
         var json = consumirApi.obtenerDatos(URL_BASE + "?search=" + libroBuscado.toLowerCase().replace(" ", "%20"));
         var datos = convierteDatos.obtenerDatos(json, Datos.class);
-        Optional<DatosLibro> datosLibro = datos.libro().stream()
-                .sorted(Comparator.comparing(DatosLibro::descargas).reversed())
-                .findFirst();
-        if (datosLibro.isPresent()) {
-            Libro libro = new Libro(datosLibro);
+        if (!datos.libro().isEmpty()) {
+            DatosLibro datosLibro = datos.libro().get(0);
+            System.out.println(datosLibro.autor());
+            Set<Autor> autor = datosLibro.autor().stream()
+                    .map(a -> {
+                        Autor autorExistente = autorRepository.findByNombre(a.nombre());
+                        if (autorExistente != null) {
+                            return autorExistente; // Si ya existe, usar el autor encontrado en la base de datos
+                        } else {
+                            return autorRepository.save(new Autor(a.nombre(), a.fechaDeNacimiento(), a.fechaDeFallecimiento()));
+                        }
+                    })
+                    .collect(Collectors.toSet());
+            System.out.println(autor.toString());
+            Libro libro = new Libro(datosLibro.titulo(), autor, new HashSet<>(datosLibro.idiomas()), datosLibro.descargas());
             System.out.println(libro.toString());
+            libroRepository.save(libro);
         } else
             System.out.println("Libro no encontrado");
     }
