@@ -47,6 +47,12 @@ public class Principal {
                 case 2:
                     listarLibrosRegistrados();
                     break;
+                case 3:
+                    listarAutoresRegistrados();
+                    break;
+                case 4:
+                    listarAutoresVivosDeterminadoAnio();
+                    break;
                 case 0:
                     System.out.println("\nCerrando la aplicación .......");
                     break;
@@ -100,8 +106,51 @@ public class Principal {
                     }
             );
             System.out.println("Descargas: " + l.getDescargas());
-            System.out.println("====================================");
+            System.out.println("=====================================");
         });
+        System.out.println("\n");
+    }
+
+    private void listarAutoresRegistrados() {
+        List<Autor> listarAutores = autorRepository.listaAutor();
+        listarAutores.forEach(
+                a -> {
+                    System.out.println("=========== *** Autor *** ===========");
+                    System.out.println("Nombre: " + a.getNombre());
+                    System.out.println("Año de nacimiento: " + a.getFechaDeNacimiento());
+                    System.out.println("Año de fallecimiento: " + a.getFechaDeFallecimiento());
+                    System.out.println("Libros: ");
+                    a.getLibros().forEach(
+                            l -> {
+                                System.out.println("\t" + l.getTitulo());
+                            }
+                    );
+                    System.out.println("=====================================");
+                }
+        );
+        System.out.println("\n");
+    }
+
+    private void listarAutoresVivosDeterminadoAnio() {
+        System.out.println("Introduazca un año");
+        int anio = teclado.nextInt();
+        teclado.nextLine();
+        List<Autor> listarAutores = autorRepository.autorVivoPorAnio(anio);
+        listarAutores.forEach(
+                a -> {
+                    System.out.println("=========== *** Autor *** ===========");
+                    System.out.println("Nombre: " + a.getNombre());
+                    System.out.println("Año de nacimiento: " + a.getFechaDeNacimiento());
+                    System.out.println("Año de fallecimiento: " + a.getFechaDeFallecimiento());
+                    System.out.println("Libros: ");
+                    a.getLibros().forEach(
+                            l -> {
+                                System.out.println("\t" + l.getTitulo());
+                            }
+                    );
+                    System.out.println("=====================================");
+                }
+        );
         System.out.println("\n");
     }
 }
