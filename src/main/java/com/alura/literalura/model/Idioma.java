@@ -24,7 +24,7 @@ public enum Idioma {
             if (idioma.idioma.equals(texto))
                 return idioma;
         System.out.println("Ninguna idioma encontrado: " + texto);
-        return ESPANIOL;
+        return null;
     }
 
     @JsonValue

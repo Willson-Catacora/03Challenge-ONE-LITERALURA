@@ -13,7 +13,10 @@ public class Libro {
     private Long Id;
     @Column(unique = true)
     private String titulo;
-    @Enumerated(EnumType.ORDINAL)
+    @ElementCollection(targetClass = Idioma.class)
+    @CollectionTable(name = "idiomas_libro", joinColumns = @JoinColumn(name = "id_libro"))
+    @Enumerated(EnumType.STRING) // Usamos EnumType.STRING para almacenar los nombres de los enums como texto
+    @Column(name = "idioma")
     Set<Idioma> idiomas;
     private Integer descargas;
     @ManyToMany
