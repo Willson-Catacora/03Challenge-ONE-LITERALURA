@@ -37,6 +37,14 @@ public class Libro {
         this.descargas = descargas;
     }
 
+    public Long getId() {
+        return Id;
+    }
+
+    public void setId(Long id) {
+        Id = id;
+    }
+
     @Override
     public String toString() {
         return "Libro{" +
@@ -55,11 +63,11 @@ public class Libro {
         this.titulo = titulo;
     }
 
-    public Set<Autor> getAutor() {
+    public Set<Autor> getAutores() {
         return autores;
     }
 
-    public void setAutor(Set<Autor> autor) {
+    public void setAutores(Set<Autor> autor) {
         this.autores = autor;
     }
 

@@ -44,6 +44,9 @@ public class Principal {
                 case 1:
                     buscarLibroPorTitulo();
                     break;
+                case 2:
+                    listarLibrosRegistrados();
+                    break;
                 case 0:
                     System.out.println("\nCerrando la aplicación .......");
                     break;
@@ -77,5 +80,28 @@ public class Principal {
             libroRepository.save(libro);
         } else
             System.out.println("Libro no encontrado");
+    }
+
+    private void listarLibrosRegistrados() {
+        List<Libro> listaLibros = libroRepository.busquedaLibros();
+        listaLibros.forEach(l -> {
+            System.out.println("=========== *** LIBRO *** ===========");
+            System.out.println("Titulo: " + l.getTitulo());
+            System.out.println("Autores: " + l.getAutores().size());
+            l.getAutores().forEach(
+                    a -> {
+                        System.out.println("\t" + a.getNombre());
+                    }
+            );
+            System.out.println("Idiomas: ");
+            l.getIdiomas().forEach(
+                    i -> {
+                        System.out.println("\t" + i + " - " + i.getIdioma());
+                    }
+            );
+            System.out.println("Descargas: " + l.getDescargas());
+            System.out.println("====================================");
+        });
+        System.out.println("\n");
     }
 }
