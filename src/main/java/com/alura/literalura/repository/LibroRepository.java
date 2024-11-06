@@ -15,13 +15,17 @@ public interface LibroRepository extends JpaRepository<Libro, Long> {
     List<Libro> busquedaLibros();
 
     @Query("SELECT l FROM Libro l " +
+            "JOIN FETCH l.autores a " +
             "JOIN FETCH l.idiomas il " +
             "WHERE il = :idioma")
     List<Libro> busquedaLibrosPorIdioma(Idioma idioma);
 
     @Query("SELECT l FROM Libro l " +
-            "JOIN FETCH l.autores "+
+            "JOIN FETCH l.autores " +
             "JOIN FETCH l.idiomas il " +
             "WHERE l.titulo = :titulo")
     Libro findByTitulo(String titulo);
+
+    @Query("SELECT l FROM Libro l LEFT JOIN FETCH l.autores LEFT JOIN FETCH l.idiomas ORDER BY l.descargas DESC LIMIT 10")
+    List<Libro> findTop10ByOrderByDescargasDesc();
 }

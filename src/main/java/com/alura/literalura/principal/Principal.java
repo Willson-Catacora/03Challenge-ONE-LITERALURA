@@ -33,6 +33,10 @@ public class Principal {
                     \t3 - listar autores registrados
                     \t4 - listar autores vivos en determinado año
                     \t5 - listar libros por idioma
+                    (Extra)
+                    \t6 - generar estadisticas
+                    \t7 - top 10 libros mas descargados (libros registrados)
+                    \t8 - buscar autor por nombre
                     
                     \t0  - Salir
                     ***========================================================***
@@ -56,6 +60,15 @@ public class Principal {
                 case 5:
                     listaDeLibrosPorIdiomas();
                     break;
+                case 6:
+                    estadisticas();
+                    break;
+                case 7:
+                    top10Libros();
+                    break;
+                case 8:
+                    busquedaAutorNombre();
+                    break;
                 case 0:
                     System.out.println("\nCerrando la aplicación .......");
                     break;
@@ -63,6 +76,35 @@ public class Principal {
                     System.out.println("\nIntroduzca una opción válida!");
             }
         }
+    }
+
+    private String verLibro(Libro l) {
+        String autores = "", idiomas = "";
+        for (Autor autor : l.getAutores())
+            autores += "\n\t" + autor.getNombre();
+        for (Idioma idioma : l.getIdiomas())
+            idiomas += "\n\t" + idioma;
+        return "============= *** LIBRO *** =============\n" +
+                "Titulo: " + l.getTitulo() + "\n" +
+                "Autores: " + l.getAutores().size() +
+                autores + "\n" +
+                "Idiomas: " +
+                idiomas + "\n" +
+                "Descargas: " + l.getDescargas() + "\n" +
+                "=========================================";
+    }
+
+    private String verAutor(Autor a) {
+        String libros = "";
+        for (Libro libro : a.getLibros())
+            libros += "\n\t" + libro.getTitulo();
+        return "============= *** AUTOR *** ==============\n" +
+                "Nombre: " + a.getNombre() + "\n" +
+                "Año de nacimiento: " + a.getFechaDeNacimiento() + "\n" +
+                "Año de fallecimiento: " + a.getFechaDeFallecimiento() + "\n" +
+                "Libros: " + a.getLibros().size() +
+                libros + "\n" +
+                "=========================================";
     }
 
     private void buscarLibroPorTitulo() {
@@ -75,7 +117,7 @@ public class Principal {
             System.out.println(datosLibro.autor());
             Set<Autor> autor = datosLibro.autor().stream()
                     .map(a -> {
-                        Autor autorExistente = autorRepository.findByNombre(a.nombre());
+                        Autor autorExistente = autorRepository.autorPorNombre(a.nombre());
                         if (autorExistente != null) {
                             return autorExistente; // Si ya existe, usar el autor encontrado en la base de datos
                         } else {
@@ -85,22 +127,7 @@ public class Principal {
                     .collect(Collectors.toSet());
             libroRepository.save(new Libro(datosLibro.titulo(), autor, new HashSet<>(datosLibro.idiomas()), datosLibro.descargas()));
             Libro l = libroRepository.findByTitulo(datosLibro.titulo());
-            System.out.println("============= *** LIBRO *** =============");
-            System.out.println("Titulo: " + l.getTitulo());
-            System.out.println("Autores: " + l.getAutores().size());
-            l.getAutores().forEach(
-                    a -> {
-                        System.out.println("\t" + a.getNombre());
-                    }
-            );
-            System.out.println("Idiomas: ");
-            l.getIdiomas().forEach(
-                    i -> {
-                        System.out.println("\t" + i + " - " + i.getIdioma());
-                    }
-            );
-            System.out.println("Descargas: " + l.getDescargas());
-            System.out.println("=========================================");
+            System.out.println(verLibro(l));
         } else
             System.out.println("Libro no encontrado");
     }
@@ -108,43 +135,16 @@ public class Principal {
     private void listarLibrosRegistrados() {
         List<Libro> listaLibros = libroRepository.busquedaLibros();
         listaLibros.forEach(l -> {
-            System.out.println("============= *** LIBRO *** =============");
-            System.out.println("Titulo: " + l.getTitulo());
-            System.out.println("Autores: " + l.getAutores().size());
-            l.getAutores().forEach(
-                    a -> {
-                        System.out.println("\t" + a.getNombre());
-                    }
-            );
-            System.out.println("Idiomas: ");
-            l.getIdiomas().forEach(
-                    i -> {
-                        System.out.println("\t" + i + " - " + i.getIdioma());
-                    }
-            );
-            System.out.println("Descargas: " + l.getDescargas());
-            System.out.println("=========================================");
+            System.out.println(verLibro(l));
         });
         System.out.println("\n");
     }
 
     private void listarAutoresRegistrados() {
         List<Autor> listarAutores = autorRepository.listaAutor();
-        listarAutores.forEach(
-                a -> {
-                    System.out.println("============= *** Autor *** =============");
-                    System.out.println("Nombre: " + a.getNombre());
-                    System.out.println("Año de nacimiento: " + a.getFechaDeNacimiento());
-                    System.out.println("Año de fallecimiento: " + a.getFechaDeFallecimiento());
-                    System.out.println("Libros: ");
-                    a.getLibros().forEach(
-                            l -> {
-                                System.out.println("\t" + l.getTitulo());
-                            }
-                    );
-                    System.out.println("=========================================");
-                }
-        );
+        listarAutores.forEach(a -> {
+            System.out.println(verAutor(a));
+        });
         System.out.println("\n");
     }
 
@@ -153,22 +153,13 @@ public class Principal {
         int anio = teclado.nextInt();
         teclado.nextLine();
         List<Autor> listarAutores = autorRepository.autorVivoPorAnio(anio);
-        listarAutores.forEach(
-                a -> {
-                    System.out.println("=========== *** Autor *** ===========");
-                    System.out.println("Nombre: " + a.getNombre());
-                    System.out.println("Año de nacimiento: " + a.getFechaDeNacimiento());
-                    System.out.println("Año de fallecimiento: " + a.getFechaDeFallecimiento());
-                    System.out.println("Libros: ");
-                    a.getLibros().forEach(
-                            l -> {
-                                System.out.println("\t" + l.getTitulo());
-                            }
-                    );
-                    System.out.println("=====================================");
-                }
-        );
-        System.out.println("\n");
+        if (!listarAutores.isEmpty()) {
+            listarAutores.forEach(a -> {
+                System.out.println(verAutor(a));
+            });
+            System.out.println("\n");
+        } else
+            System.out.println("No se encontro el autor que vivio en " + anio);
     }
 
     private void listaDeLibrosPorIdiomas() {
@@ -178,20 +169,59 @@ public class Principal {
         String lenguaje = teclado.nextLine().toLowerCase();
         Idioma idioma = Idioma.fromString(lenguaje);
         List<Libro> listaLibros = libroRepository.busquedaLibrosPorIdioma(idioma);
-        System.out.println("Idioma: " + idioma + " - Cantidad de libros: " + listaLibros.size());
-        listaLibros.forEach(l -> {
-            System.out.println("================(" + index[0] + ")==================");
-            System.out.println("Titulo: " + l.getTitulo());
-            System.out.println("Autores: ");
-            l.getAutores().forEach(a -> {
-                System.out.println(a.getNombre());
+        if (!listaLibros.isEmpty()) {
+            System.out.println("Idioma: " + idioma + " - Cantidad de libros: " + listaLibros.size());
+            listaLibros.forEach(l -> {
+                System.out.println("\t\t\t\t\t(" + index[0] + ")");
+                System.out.println(verLibro(l));
+                index[0]++;
             });
-            l.getIdiomas().forEach(i -> {
-                System.out.println("Idioma: " + i.getIdioma() + " => " + i);
-            });
-            System.out.println("=====================================");
+            System.out.println("\n");
+        } else
+            System.out.println("No se encontro libros con el idioma " + lenguaje);
+    }
+
+    private void estadisticas() {
+        List<Libro> datosLibros = libroRepository.busquedaLibros();
+        DoubleSummaryStatistics est = datosLibros.stream()
+                .filter(l -> l.getDescargas() > 0)
+                .collect(Collectors.summarizingDouble(Libro::getDescargas));
+        Libro libro = new Libro();
+        System.out.println("============ *** ESTADISTICAS *** =========");
+        System.out.println("Media de las descargas: " + est.getAverage());
+        System.out.println("===========================================");
+        datosLibros.forEach(l -> {
+            if (l.getDescargas() == est.getMax()) {
+                System.out.println("Libro mas descargado: " + est.getMax());
+                System.out.println(verLibro(l));
+            } else if (l.getDescargas() == est.getMin()) {
+                System.out.println("Libro menos descargado:  " + est.getMin());
+                System.out.println(verLibro(l));
+            }
+        });
+        System.out.println("\n");
+    }
+
+    private void top10Libros() {
+        int[] index = {1};
+        List<Libro> listaLibro = libroRepository.findTop10ByOrderByDescargasDesc();
+        System.out.println(listaLibro.size());
+        listaLibro.forEach(l -> {
+            System.out.println("\t\t\t\t(Puesto " + index[0] + ")");
+            System.out.println(verLibro(l));
             index[0]++;
         });
         System.out.println("\n");
+    }
+
+    private void busquedaAutorNombre() {
+        System.out.println("Intraduzca el nombre del autor que desee buscar");
+        String nombre = teclado.nextLine();
+        Autor autor = autorRepository.autorPorNombre(nombre.toLowerCase());
+        if (autor.getNombre() == nombre) {
+            System.out.println(verAutor(autor));
+            System.out.println("\n");
+        } else
+            System.out.println("No se encontro autor con el nombre: " + nombre);
     }
 }

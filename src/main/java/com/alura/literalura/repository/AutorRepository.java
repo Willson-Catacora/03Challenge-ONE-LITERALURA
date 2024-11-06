@@ -8,7 +8,8 @@ import java.util.List;
 
 public interface AutorRepository extends JpaRepository<Autor, Long> {
 
-    Autor findByNombre(String nombre);
+    @Query("SELECT a FROM Autor a LEFT JOIN FETCH a.libros WHERE a.nombre ilike %:nombre%")
+    Autor autorPorNombre(String nombre);
 
     @Query("SELECT a FROM Autor a LEFT JOIN FETCH a.libros ")
     List<Autor> listaAutor();
