@@ -25,9 +25,9 @@ public class Principal {
     public void mostrarMenu() {
         while (opcion != 0) {
             var menu = """
-                    ***==================================================***
+                    ***========================================================***
                     \t\tElija una de las opción a travéz  de su número
-                    ***==================================================***
+                    ***========================================================***
                     \t1 - buscar libro por título
                     \t2 - listar libros registrados
                     \t3 - listar autores registrados
@@ -35,7 +35,7 @@ public class Principal {
                     \t5 - listar libros por idioma
                     
                     \t0  - Salir
-                    ***==================================================***
+                    ***========================================================***
                     """;
             System.out.println(menu);
             opcion = teclado.nextInt();
@@ -52,6 +52,9 @@ public class Principal {
                     break;
                 case 4:
                     listarAutoresVivosDeterminadoAnio();
+                    break;
+                case 5:
+                    listaDeLibrosPorIdiomas();
                     break;
                 case 0:
                     System.out.println("\nCerrando la aplicación .......");
@@ -80,18 +83,9 @@ public class Principal {
                         }
                     })
                     .collect(Collectors.toSet());
-            System.out.println(autor.toString());
-            Libro libro = new Libro(datosLibro.titulo(), autor, new HashSet<>(datosLibro.idiomas()), datosLibro.descargas());
-            System.out.println(libro.toString());
-            libroRepository.save(libro);
-        } else
-            System.out.println("Libro no encontrado");
-    }
-
-    private void listarLibrosRegistrados() {
-        List<Libro> listaLibros = libroRepository.busquedaLibros();
-        listaLibros.forEach(l -> {
-            System.out.println("=========== *** LIBRO *** ===========");
+            libroRepository.save(new Libro(datosLibro.titulo(), autor, new HashSet<>(datosLibro.idiomas()), datosLibro.descargas()));
+            Libro l = libroRepository.findByTitulo(datosLibro.titulo());
+            System.out.println("============= *** LIBRO *** =============");
             System.out.println("Titulo: " + l.getTitulo());
             System.out.println("Autores: " + l.getAutores().size());
             l.getAutores().forEach(
@@ -106,7 +100,30 @@ public class Principal {
                     }
             );
             System.out.println("Descargas: " + l.getDescargas());
-            System.out.println("=====================================");
+            System.out.println("=========================================");
+        } else
+            System.out.println("Libro no encontrado");
+    }
+
+    private void listarLibrosRegistrados() {
+        List<Libro> listaLibros = libroRepository.busquedaLibros();
+        listaLibros.forEach(l -> {
+            System.out.println("============= *** LIBRO *** =============");
+            System.out.println("Titulo: " + l.getTitulo());
+            System.out.println("Autores: " + l.getAutores().size());
+            l.getAutores().forEach(
+                    a -> {
+                        System.out.println("\t" + a.getNombre());
+                    }
+            );
+            System.out.println("Idiomas: ");
+            l.getIdiomas().forEach(
+                    i -> {
+                        System.out.println("\t" + i + " - " + i.getIdioma());
+                    }
+            );
+            System.out.println("Descargas: " + l.getDescargas());
+            System.out.println("=========================================");
         });
         System.out.println("\n");
     }
@@ -115,7 +132,7 @@ public class Principal {
         List<Autor> listarAutores = autorRepository.listaAutor();
         listarAutores.forEach(
                 a -> {
-                    System.out.println("=========== *** Autor *** ===========");
+                    System.out.println("============= *** Autor *** =============");
                     System.out.println("Nombre: " + a.getNombre());
                     System.out.println("Año de nacimiento: " + a.getFechaDeNacimiento());
                     System.out.println("Año de fallecimiento: " + a.getFechaDeFallecimiento());
@@ -125,14 +142,14 @@ public class Principal {
                                 System.out.println("\t" + l.getTitulo());
                             }
                     );
-                    System.out.println("=====================================");
+                    System.out.println("=========================================");
                 }
         );
         System.out.println("\n");
     }
 
     private void listarAutoresVivosDeterminadoAnio() {
-        System.out.println("Introduazca un año");
+        System.out.println("Introduzca el año en el que desea buscar para ver autor(es) que estaban vivos");
         int anio = teclado.nextInt();
         teclado.nextLine();
         List<Autor> listarAutores = autorRepository.autorVivoPorAnio(anio);
@@ -151,6 +168,30 @@ public class Principal {
                     System.out.println("=====================================");
                 }
         );
+        System.out.println("\n");
+    }
+
+    private void listaDeLibrosPorIdiomas() {
+        int[] index = {1};
+        System.out.println("Introduzca un idioma que desee buscar " +
+                "(es - español , en - inglés,  fr - francés, pt - protugés)");
+        String lenguaje = teclado.nextLine().toLowerCase();
+        Idioma idioma = Idioma.fromString(lenguaje);
+        List<Libro> listaLibros = libroRepository.busquedaLibrosPorIdioma(idioma);
+        System.out.println("Idioma: " + idioma + " - Cantidad de libros: " + listaLibros.size());
+        listaLibros.forEach(l -> {
+            System.out.println("================(" + index[0] + ")==================");
+            System.out.println("Titulo: " + l.getTitulo());
+            System.out.println("Autores: ");
+            l.getAutores().forEach(a -> {
+                System.out.println(a.getNombre());
+            });
+            l.getIdiomas().forEach(i -> {
+                System.out.println("Idioma: " + i.getIdioma() + " => " + i);
+            });
+            System.out.println("=====================================");
+            index[0]++;
+        });
         System.out.println("\n");
     }
 }
