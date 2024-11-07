@@ -107,29 +107,40 @@ public class Principal {
                 "=========================================";
     }
 
+    private boolean libroYaReqistrado(String titulo) {
+        Optional<Libro> l = libroRepository.findByTitulo(titulo);
+        if (l.isPresent())
+            return false;
+        return true;
+    }
+
     private void buscarLibroPorTitulo() {
         System.out.println("\nIngrese el nombre del libro que desee buscar");
         var libroBuscado = teclado.nextLine();
-        var json = consumirApi.obtenerDatos(URL_BASE + "?search=" + libroBuscado.toLowerCase().replace(" ", "%20"));
-        var datos = convierteDatos.obtenerDatos(json, Datos.class);
-        if (!datos.libro().isEmpty()) {
-            DatosLibro datosLibro = datos.libro().get(0);
-            System.out.println(datosLibro.autor());
-            Set<Autor> autor = datosLibro.autor().stream()
-                    .map(a -> {
-                        Autor autorExistente = autorRepository.autorPorNombre(a.nombre());
-                        if (autorExistente != null) {
-                            return autorExistente; // Si ya existe, usar el autor encontrado en la base de datos
-                        } else {
-                            return autorRepository.save(new Autor(a.nombre(), a.fechaDeNacimiento(), a.fechaDeFallecimiento()));
-                        }
-                    })
-                    .collect(Collectors.toSet());
-            libroRepository.save(new Libro(datosLibro.titulo(), autor, new HashSet<>(datosLibro.idiomas()), datosLibro.descargas()));
-            Libro l = libroRepository.findByTitulo(datosLibro.titulo());
-            System.out.println(verLibro(l));
+        if (libroYaReqistrado(libroBuscado)) {
+            var json = consumirApi.obtenerDatos(URL_BASE + "?search=" + libroBuscado.toLowerCase().replace(" ", "%20"));
+            var datos = convierteDatos.obtenerDatos(json, Datos.class);
+//            System.out.println(datos.libro());
+            if (!datos.libro().isEmpty()) {
+                DatosLibro datosLibro = datos.libro().get(0);
+//                System.out.println(datosLibro.autor());
+                Set<Autor> autor = datosLibro.autor().stream()
+                        .map(a -> {
+                            Autor autorExistente = autorRepository.autorPorNombre(a.nombre());
+                            if (autorExistente != null) {
+                                return autorExistente; // Si ya existe, usar el autor encontrado en la base de datos
+                            } else {
+                                return autorRepository.save(new Autor(a.nombre(), a.fechaDeNacimiento(), a.fechaDeFallecimiento()));
+                            }
+                        })
+                        .collect(Collectors.toSet());
+                libroRepository.save(new Libro(datosLibro.titulo(), autor, new HashSet<>(datosLibro.idiomas()), datosLibro.descargas()));
+                Libro l = libroRepository.busquedaLibroPorTitulo(datosLibro.titulo());
+                System.out.println(verLibro(l));
+            } else
+                System.out.println("Libro no encontrado");
         } else
-            System.out.println("Libro no encontrado");
+            System.out.println("Libro ya se encuentra registrado...");
     }
 
     private void listarLibrosRegistrados() {
@@ -218,7 +229,7 @@ public class Principal {
         System.out.println("Intraduzca el nombre del autor que desee buscar");
         String nombre = teclado.nextLine();
         Autor autor = autorRepository.autorPorNombre(nombre.toLowerCase());
-        if (autor.getNombre() == nombre) {
+        if (autor != null) {
             System.out.println(verAutor(autor));
             System.out.println("\n");
         } else
